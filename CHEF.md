@@ -215,14 +215,14 @@ knife environment from file dev.json
    "name": "production",
    "description": "",
    "cookbook_versions": {
-           "samplecookbook": "= <cookbook_version>"
+           "<cookbook_name>": "= <cookbook_version>"
    },
    "json_class": "Chef::Environment",
    "chef_type": "environment",
    "default_attributes": {
    },
    "override_attributes": {
-           "samplecookbook": {
+           "<cookbook_name>": {
                 "env": "production",
                 "name": "Atib"
            }
