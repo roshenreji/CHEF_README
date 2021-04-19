@@ -206,7 +206,7 @@ cd environments
 ```
 * Run This Command to update Environemnet : 
 ```
-knife environments from file dev.json
+knife environment from file dev.json
 ```
 
 * For Production (prod.json)
@@ -231,7 +231,7 @@ knife environments from file dev.json
 ```
 * Run This Command to update Environemnet from environments directory:  
 ```
-knife environments from file prod.json
+knife environment from file prod.json
 ```
 
 * Select the environment from the CHEF Manage Site manually for each node
