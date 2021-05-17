@@ -76,9 +76,13 @@ knife node show <Node Name>
 ```
 chef generate cookbook <cookbook name>
 ```
+
 * Sample Scripts inside recipe directory :
 
 (You can create your own .rb recipe file or else use default.rb file)
+```
+chef generate recipe <recipe_name>
+```
 * Script1 to install Apache Server
 ```
 package 'apache2'  do
@@ -130,9 +134,9 @@ OR
 knife cookbook upload --cookbook-path ~/chef-repo/democook/ simplecookbook
 
 ```
-* Add the cookbook to the Node's Run List
+* Add the cookbook to the Node's Run List (adds on top of previous run_lists)
 ```
-knife node run_list add Node1 recipe[<cookbook name>::<ruby file name inside recipe>]
+knife node run_list add <node_name> recipe[<cookbook_name>::<recipe>]
 
 Ex:
 knife node run_list add Node1 recipe[simplecookbook::default]
@@ -141,7 +145,17 @@ knife node run_list add Node1 recipe[simplecookbook::default]
 * Once added then all future pushes of cookbooks will automatically update in the run list of the node.
 * Note: You dont have to specifically run this command and again
 
+* Set the cookbook to the Node's Run List (removes previous recipes from run_list)
+```
+knife node run_list set <node_name> recipe[<cookbook_name>::<recipe>]
+```
+* Removing recipes from run_list
+```
+knife node run_list set <node_name> ''
+```
+
 ## Creating Attributes
+
 * Create a folder named attributes inside the cookbook you are working with.
 NOTE: make sure recipes and attributes folder are on same directory structure
 * create a default attribute file: default.rb
@@ -176,8 +190,69 @@ end
 ```
 * Upload the cookbook after adding attributes
 
+
+## Node Attributes
+
+* Create a default attribute inside a cookbook
+```
+chef generate attribute default
+
+vim attributes/default.rb
+
+default['myname'] = 'atib'
+``` 
+* Add file resource in recipe
+```
+file "home/ubuntu/nodeattribute.txt" do
+    content "My Name is #{node['myname']}" 
+end
+```
+* Node attributes can be set directly from workstation by using command
+
+```
+knife node edit <nodeName> --editor /usr/bin/vim  (double TAB to check availability)
+
+or
+
+knife node edit <nodeName> --editor vim
+
+```
+* This will open a json file to edit :
+```
+{
+  "name": "Node1",
+  "chef_environment": "development",
+  "normal": {
+    "myname": "Vikas",
+    "tags": [
+
+    ]
+  },
+  "policy_name": null,
+  "policy_group": null,
+  "run_list": [
+  "recipe[linux_node::userinfo]"
+]
+
+}
+
+```
+* Can check node attributes by using command
+```
+knife node show <nodeName> -F json
+```
+* Then run chef-client on that node
+
+
 ## Working with Environments
+
 Refer Link: https://docs.chef.io/environments/
+
+* Checking list of environments
+```
+knife environment list
+```
+
 * Create an evironments directory in chef-repo directory
 ```
 mkdir environments
@@ -246,14 +321,259 @@ sudo chef-client
 * Open browser and put <ip addr for dev node>:80 and put <ip addr for prod node>:80 in two tabs
 * check the results.
 
+### Roles
 
-
-
-#### Some adhoc commands
+* List the Roles present in chef server
 ```
-knife environment list
+knife role list
 ```
+* Details of Role
+```
+knife role show <role_name>
+```
+* Creating a new Role
+```
+export EDITOR=$(which vi)
+
+knife role create <role_name>
+```
+* Editing Roles
+```
+knife role edit <role_name>
+```
+* Editing a Role (demo.json)
+```
+{
+  "name": "demo",
+  "description": "A simple demonstration role.",
+  "json_class": "Chef::Role",
+  "default_attributes": {
+
+  },
+  "override_attributes": {
+
+  },
+  "chef_type": "role",
+  "run_list": [
+    "recipe[pluralcookbook::default]"
+  ],
+  "env_run_lists": {
+
+  }
+}
+```
+* Here a run_list is assigned to a role.
+* You can add many recipes in the run_list of a single role and assign the role to a node.
+
+* Assigning Role to a Node 
+```
+knife node run_list set <node_name> 'role[<role_name>]'
+```
+* Deleteing a Role
+```
+knife role delete <role_name>
+
+Upon Confirmation? Type Y
+```
+
+
+### DataBags
+* Folder Structure
+```
+Repo      > data_bag folder > databags > items
+
+chef-repo > data_bags       > example
+                            > users    > kate.json
+                                       > james.json
+```
+
+* Listing databags
+```
+knife data bag list
+```
+* Creating databags
+```
+export EDITOR="vim" or "nano"
+
+knife data bag create <databag_name> <databag_item_name>
+```
+* Showing Items in databags
+```
+knife data bag show <databag_name>
+
+knife data bag show <databag_name> <databag_item_name>
+```
+* Editing items in databags
+```
+export EDITOR="vim" or "nano"
+
+knife data bag edit <databag_name> <databag_item_name>
+```
+* Sample databag item example 
+
+```
+knife data bag create users james
+
+
+{
+  "id": "james",
+  "fullName": "James Bannan",
+  "firstName": "James",
+  "lastName": "Bannan",
+  "country": "Australia",
+  "city": "Melbourne"
+}
+
+Save
+```
+
+* Deleting databags items
+```
+knife data bag delete <databag_name> <databag_item_name> 
+```
+
+* Recipe calling databag items (refer linux_node/recipes/userinfo.rb)
+```
+users = data_bag('users')
+
+users.each do |user|
+  userobject = data_bag_item('users', user)
+
+  file "home/ubuntu/#{userobject['id']}.txt" do
+    content "The user is #{userobject['fullName']}, they live in #{userobject['city']} which is in #{userobject['country']}."
+    mode '00755'
+  end
+end
+
+```
+* Run chef-client on nodes
+
+### Vaults
+
+
+
+
+
+## Custom Resources
+* Dont have to create resources folder explicitly if already not present
+```
+chef generate resource ~/chef-repo/cookbooks/<cookbook_name> <resource_name>
+
+```
+#### EXAMPLE01
+* Assume the cookbbok name is : pluralcookbook
+* vim into the resource_file (site.rb)
+```
+property :homepage, String, default: '<h1>Say Hello To Custom Resources</h1>'
+
+action :create do
+        package 'apache2'
+
+        service 'apache2' do
+                action [:enable, :start]
+        end
+
+        file '/var/www/html/index.html' do
+                content new_resource.homepage
+        end
+end
+```
+* Edit Recipe File to use custom resources
+* Reference : <cookbook_name>_<custom_resource_name>
+```
+pluralcookbook_site 'apache2' do
+        homepage "<h1>This Site is running on #{node['hostname']} and the Operating System is #{node['platform'].capitalize()}</h1>"
+end
+```
+* Upload cookbook and run chef-client from node
+
+
+#### EXAMPLE02
+* Assume the cookbbok name is : node_site
+* vim into the resource_file (website.rb)
+
+```
+property :homepage, String, default: '<h1>Hello world!</h1>'
+
+action :create do
+  folder = '/var/www/html/'
+  file = 'index.html'
+
+
+  if platform_family?("debian")
+    apt_update
+  end
+
+  package 'Install Apache' do
+    case node[:platform]
+    when 'redhat', 'centos'
+      package_name 'httpd'
+      action :upgrade
+    when 'ubuntu', 'debian'
+      package_name 'apache2'
+      action :upgrade
+    end
+  end
+
+  service 'Start Apache' do
+    case node[:platform]
+    when 'redhat', 'centos'
+      service_name 'httpd'
+      action [:enable, :start]
+    when 'ubuntu', 'debian'
+      service_name 'apache2'
+      action [:enable, :start]
+    end
+  end
+
+  file "#{folder}#{file}" do
+    content new_resource.homepage
+  end
+end
+
+action :delete do
+  package 'httpd' do
+    action :delete
+  end
+end
+```
+* Note that here default action is create
+* Delete action also can be explicitly called
+
+* Edit Recipe File to use custom resources
+* Reference : <cookbook_name>_<custom_resource_name>
+
+
+* default.rb
+```
+include_recipe 'node_site::site'
+```
+* site.rb
+```
+node_site_website 'httpd' do
+    homepage "<h1>This site is running on #{node['hostname']} and the operating system is #{node['platform'].capitalize()}.</h1>"
+end
+
+```
+* Upload cookbook and run chef-client from node
+
+## Kitchen Commands
+```
+kitchen list
+
+kitchen create
+
+kitchen converge
+
+kitchen login (logging onto vm)
+
+kitchen verify (testing)
+
+kitchen destroy
+
+kitchen test (combines all processes viz. create+converge+verify+destroy)
+```
+
+
 #### Chef Automation Tutorials-6 | Configuration Management Links :
 https://www.youtube.com/watch?v=doS1p5AR6KI&list=LL&index=2&t=1886s
-
-
