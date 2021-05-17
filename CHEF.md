@@ -321,7 +321,7 @@ sudo chef-client
 * Open browser and put <ip addr for dev node>:80 and put <ip addr for prod node>:80 in two tabs
 * check the results.
 
-### Roles
+## Roles
 
 * List the Roles present in chef server
 ```
@@ -377,7 +377,7 @@ Upon Confirmation? Type Y
 ```
 
 
-### DataBags
+## DataBags
 * Folder Structure
 ```
 Repo      > data_bag folder > databags > items
@@ -448,7 +448,7 @@ end
 ```
 * Run chef-client on nodes
 
-### Vaults
+## Vaults
 
 
 
