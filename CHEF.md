@@ -60,14 +60,15 @@ knife bootstrap <public ip address of node> --ssh-user ubuntu --sudo --ssh-ident
 * Head over to CHEF Server 
 * Click on Nodes Tab
 * You will be able to see the node list
-* Link: https://docs.chef.io/install_bootstrap/ (Not So Imp)
-
-#### Some ad-hoc commands
+* Commands for node details
 ```
 knife node list
 
 knife node show <Node Name>
 ```
+* Link: https://docs.chef.io/install_bootstrap/ (Not So Imp)
+
+
 
 
 ## Creating a Sample CookBook (From Workstation)
@@ -378,6 +379,12 @@ Upon Confirmation? Type Y
 
 
 ## DataBags
+
+A directory named data_bags is created.
+For each data bag, a sub-directory is created that has the same name as the data bag.
+For each data bag item, a JSON file is created and placed in the appropriate sub-directory.
+
+
 * Folder Structure
 ```
 Repo      > data_bag folder > databags > items
@@ -447,6 +454,39 @@ end
 
 ```
 * Run chef-client on nodes
+
+## Encrypting a data bag item with shared keys
+
+#### SECRET KEY GEN
+* Encrypting a data bag item requires a secret key.
+* OpenSSL can be used to generate a random number, which can then be used as the secret key:
+* Note: This command here is run inside chef-repo and hence the same path will be used later.
+
+```
+openssl rand -base64 512 | tr -d '\r\n' > my_secret_key
+
+```
+#### ENCRYPT
+
+* If new item is to be created and encrypted
+```
+knife data bag create <data_bag_name> <data_bag_item_name> --secret-file ~/chef-repo/my_secret_key
+
+```
+* If item is already present and is to be encrypted
+```
+knife data bag edit users emily --secret-file ~/chef-repo/my_secret_key
+
+```
+#### VERIFY
+```
+knife data bag show users emily
+```
+#### DECRYPT
+```
+knife data bag show --secret-file ~/chef-repo/my_secret_key users emily
+```
+
 
 ## Vaults
 
