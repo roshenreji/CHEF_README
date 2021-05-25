@@ -378,24 +378,14 @@ Upon Confirmation? Type Y
 ```
 
 #### Precedence
+*************
 (for default)
-*************
-attributes
-    |
-    ~
-node object
-    |
-    ~
-environment
-    |    
-    ~
-  role
-*************
+attributes <- node object <- environment <- role
 
 (for normal)
 
 (for override)    
-
+*************
 
 ## DataBags
 
