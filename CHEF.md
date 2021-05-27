@@ -4,12 +4,12 @@
 https://www.youtube.com/watch?v=JwjBZkxjaxE&list=LL&index=4
 
 
-## Setting Up Chef Server
+# Setting Up Chef Server
 * Open an account on CHEF Manage
 * This will be your hosted server for CHEF
 * Site Link: https://manage.opscode.com
 
-## Creating a WorkStation
+# Creating a WorkStation
 * Provision an ubuntu vm on aws/azure 
 * Open Link: https://docs.chef.io/workstation/install_workstation/
 * Head over to Linux Docs Part
@@ -28,16 +28,17 @@ sudo dpkg -i chef-workstation_21.2.278-1_amd64.deb
 chef -v
 ```
 
-## Connecting workstation with CHEF Server
+# Connecting workstation with CHEF Server
 * Head over to CHEF Manage Server
 * Select the Adminstration Tab
 * On Actions select 'Starter Kit'
 * Download the starter kit on local system
 * UnZip that File
 * Then copy the unzipped File into the workstation
-* Make sure you have the .pem file in the same folder from where u want to copy a file
+* Make sure you have the .pem file in the same folder from where u want to copy the file
+* open cmd in the pwd
 ```
-scp -r -i "awskeypair.pem" chef-repo/ ubuntu@ec2-3-12-36-226.us-east-2.compute.amazonaws.com:~/
+scp -r -i "awskeypair.pem" chef-starter/chef-repo/ ubuntu@ec2-3-12-36-226.us-east-2.compute.amazonaws.com:~/
 ```
 * Copy the .pem file to that folder and make sure the path to be pasted in is correct
 ```
@@ -45,13 +46,13 @@ scp -r -i "awskeypair.pem" awskeypair.pem ubuntu@ec2-3-12-36-226.us-east-2.compu
 ```
 * These all steps will help to communicate workstation and server
 
-* Use this cmd for verifying ssl configuration for the CHEF Infra Server (Run this from the chef-repo directory)
+* Use this command for verifying ssl configuration for the CHEF Infra Server (Run this from the chef-repo directory)
 ```
 knife ssl check
 ```
 
 
-## Bootstrap a node (From workstation)
+# Bootstrap a node (From workstation)
 * Create two node vms on aws/azure and tag them as Node1 and node2
 * Remember to add the inbound access for HTTP 80 in the sec groups of both nodes
 ```
@@ -71,7 +72,8 @@ knife node show <Node Name>
 
 
 
-## Creating a Sample CookBook (From Workstation)
+# Creating a Sample CookBook (From Workstation)
+
 * Either create a cookbook inside 'cookbooks folder' or create a new directory and create cookbooks inside them
 * Run the below command to create cookbook inside chef-repo/cookbooks
 ```
@@ -111,7 +113,7 @@ end
 https://www.youtube.com/watch?v=wY6xg7CI5Xw&list=PLsgnv1SN76IJIiBg0e1lAIIAW1xZXPHF1&index=4
 
 
-## Uploading a CookBook (From WorkStation)
+# Uploading a CookBook (From WorkStation)
 * For Syntax Check of ruby script
 ```
 chef exec ruby -c recipes/default.rb
@@ -155,7 +157,17 @@ knife node run_list set <node_name> recipe[<cookbook_name>::<recipe>]
 knife node run_list set <node_name> ''
 ```
 
-## Creating Attributes
+#### Downloading and Uploading cookbooks from supermarket
+
+```
+knife supermarket downlaod <cookbook_name>
+
+tar -xzf <file>.tar.gz
+
+knife cookbook upload <cookbook_name>
+```
+
+# Creating Attributes
 
 * Create a folder named attributes inside the cookbook you are working with.
 NOTE: make sure recipes and attributes folder are on same directory structure
@@ -192,7 +204,7 @@ end
 * Upload the cookbook after adding attributes
 
 
-## Node Attributes
+# Node Attributes
 
 * Create a default attribute inside a cookbook
 ```
@@ -245,7 +257,7 @@ knife node show <nodeName> -F json
 * Then run chef-client on that node
 
 
-## Working with Environments
+# Working with Environments
 
 Refer Link: https://docs.chef.io/environments/
 
@@ -322,7 +334,7 @@ sudo chef-client
 * Open browser and put <ip addr for dev node>:80 and put <ip addr for prod node>:80 in two tabs
 * check the results.
 
-## Roles
+# Roles
 
 * List the Roles present in chef server
 ```
@@ -377,6 +389,16 @@ knife role delete <role_name>
 Upon Confirmation? Type Y
 ```
 
+### Another way to create Roles
+
+* cd into roles dir
+* create a role file : <role_name>.json
+* Run Command from roles dir
+```
+knife role from file <role_name>.json
+```
+
+
 #### Precedence
 *************
 (for default)
@@ -387,7 +409,7 @@ attributes <- node object <- environment <- role
 (for override)    
 *************
 
-## DataBags
+# DataBags
 
 A directory named data_bags is created.
 For each data bag, a sub-directory is created that has the same name as the data bag.
@@ -464,7 +486,18 @@ end
 ```
 * Run chef-client on nodes
 
-## Encrypting a data bag item with shared keys
+### Another way to create databags 
+
+* cd into data_bags dir
+* create a data_bag
+* create a data_bag_item : <filename>.json
+* Run Command from data_bags dir
+```
+knife data bag from file <data_bag_name> <data_bag_name>/<filename>.json
+```
+
+
+# Encrypting a data bag item with shared keys
 
 #### SECRET KEY GEN
 * Encrypting a data bag item requires a secret key.
@@ -497,13 +530,20 @@ knife data bag show --secret-file ~/chef-repo/my_secret_key users emily
 ```
 
 
-## Vaults
+# CHEF Vaults
+```
+knife vault list
+
+knife vault create user james
+
+knife vault create user kate -J kate.json
+```
 
 
 
 
 
-## Custom Resources
+# Custom Resources
 * Dont have to create resources folder explicitly if already not present
 ```
 chef generate resource ~/chef-repo/cookbooks/<cookbook_name> <resource_name>
@@ -606,7 +646,7 @@ end
 ```
 * Upload cookbook and run chef-client from node
 
-## Kitchen Commands
+# Kitchen Commands
 ```
 kitchen list
 
