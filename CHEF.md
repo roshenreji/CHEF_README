@@ -539,7 +539,7 @@ knife vault create user james
 knife vault create user kate -J kate.json
 ```
 
-
+LEARNING PATH LINKS : https://blog.chef.io/chef-vault-what-is-it-and-what-can-it-do-for-you
 
 
 
