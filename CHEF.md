@@ -108,6 +108,29 @@ service 'nginx' do
  action [:enable,:start]
 end
 ```
+
+
+#Creating a Sample CookBook With Berks (From Workstation)
+
+* berks is the new method to upload cookbooks to our Chef Server
+
+In order to have berksfile when we generate cookbook, do the following
+
+```
+chef generate cookbook <cookbook name> --berks
+```
+
+* Now this cookbook folder will have a file Named "Berksfile" Inside it
+
+To install and upload cookbooks through berks do the following
+
+* Go inside the cookbook which you created
+* In command prompt, type the following commands one by one
+```
+berks install
+berks upload
+```
+
 #### NOTE: You can change versions of cookbooks in metadata.rb in your cookbook folder if required
 #### Chef Cookbook Recipe Tutorial for beginners
 https://www.youtube.com/watch?v=wY6xg7CI5Xw&list=PLsgnv1SN76IJIiBg0e1lAIIAW1xZXPHF1&index=4
